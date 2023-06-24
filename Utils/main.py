@@ -1,10 +1,11 @@
-from utils import Classes
+from Utils.classes import HeadHunterAPI, SuperJobAPI
+from Utils.json_saver import JSONSaver
 
 # Создание экземпляра класса для работы с API сайтов с вакансиями
 # superjob_api = SuperJobAPI()
 
 # Получение вакансий с разных платформ
-hh_vacancies = Classes.HeadHunterAPI
+hh_vacancies = HeadHunterAPI
 
 # superjob_vacancies = superjob_api.get_vacancies("Python")
 
@@ -22,9 +23,9 @@ def user_interaction():
     search_query = input("Enter a query to search for vacancies: ")
     list_vacancy_hh_sj = []
 
-    head_hunter_api = Classes.HeadHunterAPI(search_query)
-    # super_jb_api = SuperJobAPI()
-    # json_saver = JSONSaver()
+    head_hunter_api = HeadHunterAPI(search_query)
+    super_jb_api = SuperJobAPI(search_query)
+    json_saver = JSONSaver()
 
     # platforms = {"hh": hh_api, "sj": super_jb_api}
     platforms = {"hh": head_hunter_api}
@@ -35,10 +36,10 @@ def user_interaction():
         answer = input()
         if answer.lower() == "yes":
             selected_platforms.append(platform)
-
+            print(selected_platforms)
     vacancies = []
     for platform in selected_platforms:
-        platform_vacancies = platform.get_vacancy(platform.get_request())
+        platform_vacancies = platform.get_all_vacancies_info()
         vacancies.append(platform_vacancies)
         return vacancies
 

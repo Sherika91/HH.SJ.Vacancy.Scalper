@@ -1,6 +1,10 @@
+import os
 from abc import ABC, abstractmethod
+from datetime import datetime
+
 import requests
-from utils.exeptions import ParsingError
+from exceptions import ParsingError
+from dotenv import load_dotenv
 
 
 class AbstractAPi(ABC):
@@ -67,8 +71,81 @@ class HeadHunterAPI(AbstractAPi):
         return all_vacancies_info
 
 
+class SuperJobAPI(AbstractAPi):
+    """Класс для работы с API SuperJob."""
+    load_dotenv()
+    url = f'https://api.superjob.ru/2.0/vacancies/'
+    sj_api_secret_key = os.getenv('SJ_API_SECRET_KEY')
 
-class 
+    def __init__(self, keyword):
+        self.keyword = keyword
+        self.api_url = 'https://api.superjob.ru/2.0/vacancies/'
+        self.params = {
+            "count": 100,
+            "page": 0,
+            "keyword": self.keyword,
+            "archive": False
+        }
+
+        self.header = {
+            "X-Api-App-Id": self.sj_api_secret_key
+        }
+        self.vacancies = []
+
+    def get_request(self):
+        vacancies_tmp = []
+        while True:
+
+            response = requests.get(self.api_url, headers=self.header, params=self.params)
+            if response.status_code == 200:
+                print(f'{self.__class__.__name__} загрузка страницы {self.params["page"]}')
+                data = response.json()
+                vacancies_tmp.extend(data['objects'])
+                more_results = data['more']
+                if not more_results:
+                    break
+                self.params['page'] += 1
+            else:
+                print('Ошибка при получении списка вакансий с API SuperJob.ru:', response.text)
+        filtered_vacancies = self.get_vacancy(vacancies_tmp)
+        self.vacancies.extend(filtered_vacancies)
+
+    @staticmethod
+    def get_vacancy(vacancy_data: list) -> list:
+        try:
+            """
+               Функция извлекает и конвертирует данные о вакансиях.
+
+               """
+            vacancies = []
+            for vacancy in vacancy_data:
+                if not vacancy["is_closed"]:
+                    datetime_obj = datetime.fromtimestamp(vacancy['date_published'])
+                    formatted_date = datetime_obj.strftime("%Y.%m.%d %H:%M:%S")
+                    payment_from = vacancy['payment_from'] if vacancy['payment_from'] is not None else 0
+                    payment_to = vacancy['payment_to'] if vacancy['payment_to'] is not None else 0
+                    processed_vacancy = {
+                        'platform': "SuperJob",
+                        "id": vacancy["id"],
+                        'title': vacancy['profession'],
+                        'company': vacancy['firm_name'],
+                        'url': vacancy['link'],
+                        'area': vacancy['town']['title'],
+                        'address': vacancy['address'],
+                        'candidat': vacancy['candidat'],
+                        'vacancyRichText': vacancy['vacancyRichText'],
+                        'date_published': formatted_date,
+                        'payment': {'from': payment_from, 'to': payment_to, 'currency': vacancy["currency"]}
+                    }
+                    vacancies.append(processed_vacancy)
+
+            return vacancies
+
+        except FileNotFoundError:
+            print("File not found!")
+        except KeyError:
+            print("Key not found!")
+
 # usinp = "Java Developer"
 # hh = HeadHunterAPI(usinp)
 # print(hh.get_all_vacancies_info())
