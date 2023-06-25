@@ -2,27 +2,9 @@ import sys
 from Utils.classes import HeadHunterAPI, SuperJobAPI
 from Utils.json_saver import JSONSaver
 
-# Создание экземпляра класса для работы с API сайтов с вакансиями
-# superjob_api = SuperJobAPI()
-
-# Получение вакансий с разных платформ
-hh_vacancies = HeadHunterAPI
-
-
-# superjob_vacancies = superjob_api.get_vacancies("Python")
-
-# Сохранение информации о вакансиях в файл
-# json_saver = JSONSaver()
-# json_saver.add_vacancy(vacancy)
-# json_saver.get_vacancies_by_salary("100 000-150 000 руб.")
-# json_saver.delete_vacancy(vacancy)
-
-
-# Функция для взаимодействия с пользователем
-
 
 def user_interaction():
-
+    """Function for user interaction"""
     while True:
         search_query = input("\nEnter a query to search for vacancies: ").strip()
         if search_query.isnumeric() or len(search_query) == 0:
@@ -54,13 +36,15 @@ def user_interaction():
     data = json_saver.load_data()
 
     print("\nChose command to continue.\n"
-          "1. - Output all vacancies\n"
+          "1. - Output ll vacancies\n"
           "2. - Get vacancy by salary\n"
-          "3. - Get Vacancy by Top salary\n"         
-          "4. - Delete Vacancy\n"
+          "3. - Get vacancy by Top salary\n"         
+          "4. - Get vacancy by city\n"
+          "5. - Save data as CSV\n"
           "0. - Exit the program\n")
 
     while True:
+
         answer = input()
         if answer == "1":
             for vacancy in data:
@@ -75,13 +59,24 @@ def user_interaction():
                 else:
                     print(vacancy)
                     print("_" * 60)
+
         elif answer == "3":
             usr_input_3 = input("Enter count of top vacancies: ")
             for vacancy in json_saver.get_top_vacancies(usr_input_3):
                 print(vacancy)
                 print("_" * 60)
 
+        elif answer == "4":
+            usr_input_4 = input("Enter city: ").title()
+            for vacancy in json_saver.get_vacancy_by_city(usr_input_4):
+                print(vacancy)
+                print("_" * 60)
+
+        elif answer == "5":
+            json_saver.save_data_as_csv()
+
         elif answer == "0":
+            print("Goodbye!")
             sys.exit()
         else:
             print("No such command :(")
