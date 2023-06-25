@@ -1,3 +1,4 @@
+import sys
 from Utils.classes import HeadHunterAPI, SuperJobAPI
 from Utils.json_saver import JSONSaver
 
@@ -6,6 +7,7 @@ from Utils.json_saver import JSONSaver
 
 # Получение вакансий с разных платформ
 hh_vacancies = HeadHunterAPI
+
 
 # superjob_vacancies = superjob_api.get_vacancies("Python")
 
@@ -20,15 +22,20 @@ hh_vacancies = HeadHunterAPI
 
 
 def user_interaction():
-    search_query = input("Enter a query to search for vacancies: ")
-    list_vacancy_hh_sj = []
+
+    while True:
+        search_query = input("\nEnter a query to search for vacancies: ").strip()
+        if search_query.isnumeric() or len(search_query) == 0:
+            print("Please enter a valid search query")
+
+        else:
+            break
 
     head_hunter_api = HeadHunterAPI(search_query)
     super_jb_api = SuperJobAPI(search_query)
     json_saver = JSONSaver()
 
-    # platforms = {"hh": hh_api, "sj": super_jb_api}
-    platforms = {"hh": head_hunter_api}
+    platforms = {"hh": head_hunter_api, "sj": super_jb_api}
     selected_platforms = []
 
     for name, platform in platforms.items():
@@ -36,75 +43,48 @@ def user_interaction():
         answer = input()
         if answer.lower() == "yes":
             selected_platforms.append(platform)
-            print(selected_platforms)
+
     vacancies = []
+
     for platform in selected_platforms:
         platform_vacancies = platform.get_all_vacancies_info()
-        vacancies.append(platform_vacancies)
-        return vacancies
+        vacancies.extend(platform_vacancies)
+    json_saver.save_as_json(vacancies)
 
-    print(vacancies)
+    data = json_saver.load_data()
 
+    print("\nChose command to continue.\n"
+          "1. - Output all vacancies\n"
+          "2. - Get vacancy by salary\n"
+          "3. - Get Vacancy by Top salary\n"         
+          "4. - Delete Vacancy\n"
+          "0. - Exit the program\n")
 
+    while True:
+        answer = input()
+        if answer == "1":
+            for vacancy in data:
+                print(vacancy)
+                print("_" * 60)
 
+        elif answer == "2":
+            usr_input_2 = input("Enter top salary: ")
+            for vacancy in json_saver.get_vacancies_by_salary(usr_input_2):
+                if vacancy == "No vacancies found":
+                    print(vacancy)
+                else:
+                    print(vacancy)
+                    print("_" * 60)
+        elif answer == "3":
+            usr_input_3 = input("Enter count of top vacancies: ")
+            for vacancy in json_saver.get_top_vacancies(usr_input_3):
+                print(vacancy)
+                print("_" * 60)
 
-
-    # for vacan in list_vacancy_hh_sj:
-    #     if search_query == vacan.title:
-    #         print(vacan)
-    #     else:
-    #         print(f"Нет вакансий, соответствующих заданным критериям.")
-
-    # def get_formatted_vacancies(self):
-    #     formatted_vacancies = []
-    #
-    #     for vacancy in self.get_request():
-    #         formatted_vacancy = {
-    #             "api": "HeadHunter",
-    #             "area": vacancy["area"]["name"],
-    #             "employer": vacancy["employer"]["name"],
-    #             "requirement": vacancy["snippet"]["requirement"],
-    #             "title": vacancy["name"],
-    #             "url": vacancy["alternate_url"],
-    #
-    #         }
-    #         salary = vacancy["salary"]
-    #
-    #         if salary:
-    #             formatted_vacancy["salary"] = salary["from"]
-    #             formatted_vacancy["salary_to"] = salary["to"]
-    #             formatted_vacancy["currency"] = salary["currency"]
-    #         else:
-    #             formatted_vacancy["salary"] = None
-    #             formatted_vacancy["salary_to"] = None
-    #             formatted_vacancy["currency"] = None
-    #
-    #         formatted_vacancies.append(formatted_vacancy)
-    #
-    #     return formatted_vacancies
-
-    # for vacancy in list_vacancy_hh_sj:
-    #     print(list_vacancy_hh_sj)
-
-    # print('{title}, {employer}\n'
-    #       '{area}\n'
-    #       '{salary_from} --> {salary_to}\n'
-    #       '{requirement}\n'
-    #       '{url}\n'.format(title=vacancy["name"], employer=vacancy["employer"]["name"],
-    #                        area=vacancy["area"]["name"],
-    #                        salary_from=["salary"][int("from")], salary_to=["salary"][int("to")],
-    #                        url=vacancy["area"]["url"],
-    #                        requirement=vacancy["snippet"]["requirement"],
-    #                        )
-    #       )
-
-    # vacancy_ = Vacancy(title=vacancy["name"], area=vacancy["area"]["name"],
-    #                    employer=vacancy["employer"]["name"],
-    #                    url=vacancy['area']['url'],
-    #                    salary_from=vacancy["salary"][int("from")], salary_to=vacancy["salary"][int("to")],
-    #                    requirement=vacancy['snippet']['requirement'])
-    #
-    # print(vacancy_)
+        elif answer == "0":
+            sys.exit()
+        else:
+            print("No such command :(")
 
 
 if __name__ == "__main__":

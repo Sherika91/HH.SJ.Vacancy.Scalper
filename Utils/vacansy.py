@@ -1,10 +1,7 @@
-from Utils.json_saver import JSONSaver
+class Vacancy:
 
-
-class Vacancy(JSONSaver):
-
-    def __init__(self, title, area, employer, url, salary_from, salary_to, currency, requirement):
-        super().__init__()
+    def __init__(self, id, title, area, employer, url, salary_from, salary_to, currency):
+        self.id = id
         self.title = title
         self.area = area
         self.employer = employer
@@ -12,11 +9,22 @@ class Vacancy(JSONSaver):
         self.salary_from = salary_from
         self.salary_to = salary_to
         self.currency = currency
-        self.requirement = requirement
 
     def __str__(self):
-        return f"{self.title}, {self.area}," \
-               f"{self.employer}," \
-               f"{self.salary_from}{self.currency} --> {self.salary_to}{self.currency}" \
-               f"{self.url}," \
-               f"{self.requirement}"
+        if self.currency is None:
+            return f"""
+Vacancy id: {self.id}.
+Job title: {self.title}.
+City: {self.area}.
+Employer: {self.employer}.
+Salary: {self.salary_from} --> {self.salary_to}
+Link: {self.url}"""
+        else:
+            return f"""
+Vacancy id: {self.id}.
+Job title{self.title}
+City: {self.area}.
+Employer: {self.employer}.
+Salary: {self.salary_from} {self.currency} --> {self.salary_to} {self.currency}
+Link: {self.url}."""
+
