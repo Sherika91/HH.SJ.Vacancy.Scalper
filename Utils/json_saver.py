@@ -61,6 +61,7 @@ class JSONSaver(AbstractAPI):
         with open("../vacancies.json", encoding="utf-8") as file:
             data = json.load(file)
         result = []
+        vacancy: object
         for vacancy in data:
             if vacancy["salary_from"] is None:
                 continue
@@ -69,26 +70,26 @@ class JSONSaver(AbstractAPI):
                                       vacancy["area"], vacancy["employer"],
                                       vacancy["url"], vacancy["salary_from"],
                                       vacancy["salary_to"], vacancy["currency"]))
-            else:
-                if len(result) == 0:
-                    result.append("No vacancies found")
+
+        if len(result) == 0:
+            result.append("No vacancies found")
 
         return result
 
     @staticmethod
     def get_top_vacancies(count):
         """Returns top vacancies by salary"""
+        result = []
         with open("../vacancies.json", encoding="utf-8") as file:
             data = json.load(file)
-        result = []
+        data = sorted(data, key=lambda x: x["salary_from"] if x["salary_from"] else 0, reverse=True)
         for vacancy in data:
-            if vacancy["salary_from"] is None:
-                continue
-            else:
-                res = sorted(vacancy, key=lambda x: x["salary_from"], reverse=True)
-                result.append(res)
+            result.append(Vacancy(vacancy["id"], vacancy["title"],
+                                  vacancy["area"], vacancy["employer"],
+                                  vacancy["url"], vacancy["salary_from"],
+                                  vacancy["salary_to"], vacancy["currency"]))
 
-        return result[:count]
+        return result[:int(count)]
 
     @staticmethod
     def get_vacancy_by_city(city):
