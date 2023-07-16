@@ -22,7 +22,7 @@ Link: {self.url}"""
         else:
             return f"""
 Vacancy id: {self.id}.
-Job title{self.title}
+Job title: {self.title}
 City: {self.area}.
 Employer: {self.employer}.
 Salary: {self.salary_from} {self.currency} --> {self.salary_to} {self.currency}
